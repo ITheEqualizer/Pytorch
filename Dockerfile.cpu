@@ -1,0 +1,38 @@
+# CPU-only version for systems without GPU
+FROM pytorch/pytorch:2.1.0-cpu
+
+# Set working directory
+WORKDIR /workspace
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    curl \
+    vim \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project files
+COPY . .
+
+# Create directories for data and models
+RUN mkdir -p /workspace/data /workspace/models /workspace/outputs
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+
+# Expose Jupyter notebook port
+EXPOSE 8888
+
+# Expose TensorBoard port
+EXPOSE 6006
+
+# Default command
+CMD ["bash"]

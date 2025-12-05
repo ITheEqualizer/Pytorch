@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  pytorch-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pytorch-project:gpu
+    container_name: pytorch-gpu
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      - ./src:/workspace/src
+      - ./data:/workspace/data
+      - ./models:/workspace/models
+      - ./outputs:/workspace/outputs
+      - ./notebooks:/workspace/notebooks
+    ports:
+      - "8888:8888"  # Jupyter
+      - "6006:6006"  # TensorBoard
+    shm_size: '8gb'  # Shared memory for data loaders
+    stdin_open: true
+    tty: true
+    command: bash
+
+  pytorch-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    image: pytorch-project:cpu
+    container_name: pytorch-cpu
+    volumes:
+      - ./src:/workspace/src
+      - ./data:/workspace/data
+      - ./models:/workspace/models
+      - ./outputs:/workspace/outputs
+      - ./notebooks:/workspace/notebooks
+    ports:
+      - "8889:8888"  # Jupyter (different port to avoid conflict)
+      - "6007:6006"  # TensorBoard
+    shm_size: '2gb'
+    stdin_open: true
+    tty: true
+    command: bash
