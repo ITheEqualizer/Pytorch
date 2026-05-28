@@ -1,14 +1,17 @@
 """
 Unit tests for configuration module.
 """
-import pytest
+
 import torch
-from pathlib import Path
-import sys
 
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
-
-from config import Config, PathConfig, ModelConfig, TrainingConfig, DeviceConfig, get_config
+from config import (
+    Config,
+    DeviceConfig,
+    ModelConfig,
+    PathConfig,
+    TrainingConfig,
+    get_config,
+)
 
 
 def test_path_config_initialization():
@@ -54,11 +57,7 @@ def test_get_config():
 
 
 def test_custom_model_config():
-    custom_model_config = ModelConfig(
-        input_size=1024,
-        hidden_size=256,
-        num_classes=20
-    )
+    custom_model_config = ModelConfig(input_size=1024, hidden_size=256, num_classes=20)
     assert custom_model_config.input_size == 1024
     assert custom_model_config.hidden_size == 256
     assert custom_model_config.num_classes == 20
@@ -66,9 +65,7 @@ def test_custom_model_config():
 
 def test_custom_training_config():
     custom_training_config = TrainingConfig(
-        batch_size=128,
-        num_epochs=50,
-        learning_rate=0.0001
+        batch_size=128, num_epochs=50, learning_rate=0.0001
     )
     assert custom_training_config.batch_size == 128
     assert custom_training_config.num_epochs == 50

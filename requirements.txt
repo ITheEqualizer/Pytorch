@@ -1,3 +1,7 @@
+# Docker dependency set. Does NOT include torch -- the pytorch/pytorch base
+# image already provides it. For LOCAL development install torch and core deps
+# from pyproject.toml instead: `pip install -e .[dev]`. See CLAUDE.md.
+
 # Core ML libraries
 numpy>=1.24.0
 pandas>=2.0.0

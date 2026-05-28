@@ -1,34 +1,36 @@
 """
 Metrics calculation and tracking utilities.
 """
-import torch
+
 from typing import Tuple
+
+import torch
 
 
 class AverageMeter:
     """Computes and stores the average and current value."""
-    
+
     def __init__(self, name: str = ""):
         """
         Initialize the meter.
-        
+
         Args:
             name: Name of the metric being tracked.
         """
         self.name = name
         self.reset()
-    
+
     def reset(self) -> None:
         """Reset all statistics."""
         self.val = 0.0
         self.avg = 0.0
         self.sum = 0.0
         self.count = 0
-    
+
     def update(self, val: float, n: int = 1) -> None:
         """
         Update the meter with a new value.
-        
+
         Args:
             val: Value to add.
             n: Number of instances this value represents.
@@ -37,7 +39,7 @@ class AverageMeter:
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
-    
+
     def __str__(self) -> str:
         """String representation of the meter."""
         return f"{self.name}: {self.avg:.4f}"
@@ -46,11 +48,11 @@ class AverageMeter:
 def calculate_accuracy(outputs: torch.Tensor, targets: torch.Tensor) -> float:
     """
     Calculate classification accuracy.
-    
+
     Args:
         outputs: Model outputs (logits or probabilities).
         targets: Ground truth labels.
-    
+
     Returns:
         Accuracy as a percentage.
     """
@@ -61,18 +63,16 @@ def calculate_accuracy(outputs: torch.Tensor, targets: torch.Tensor) -> float:
 
 
 def calculate_top_k_accuracy(
-    outputs: torch.Tensor,
-    targets: torch.Tensor,
-    k: int = 5
+    outputs: torch.Tensor, targets: torch.Tensor, k: int = 5
 ) -> float:
     """
     Calculate top-k accuracy.
-    
+
     Args:
         outputs: Model outputs (logits or probabilities).
         targets: Ground truth labels.
         k: Number of top predictions to consider.
-    
+
     Returns:
         Top-k accuracy as a percentage.
     """
@@ -84,16 +84,15 @@ def calculate_top_k_accuracy(
 
 
 def get_predictions_and_labels(
-    outputs: torch.Tensor,
-    targets: torch.Tensor
+    outputs: torch.Tensor, targets: torch.Tensor
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Extract predictions and labels from model outputs.
-    
+
     Args:
         outputs: Model outputs.
         targets: Ground truth labels.
-    
+
     Returns:
         Tuple of (predictions, labels).
     """

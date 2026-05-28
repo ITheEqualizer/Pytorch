@@ -101,9 +101,11 @@ Pytorch/
 │   ├── logs/                  # TensorBoard logs
 │   └── checkpoints/           # Model checkpoints
 ├── notebooks/                   # Jupyter notebooks
-├── setup.py                    # Package configuration
-├── requirements.txt            # Python dependencies
+├── pyproject.toml              # Package configuration, deps, tool config
+├── .flake8                     # flake8 config (not read from pyproject)
+├── requirements.txt            # Docker dependencies (no torch)
 ├── docker-compose.yml         # Docker Compose config
+├── .github/workflows/ci.yml   # Lint, type-check, and test on CI
 └── README.md                  # This file
 ```
 
@@ -149,6 +151,25 @@ from config import Config, ModelConfig, TrainingConfig
 config = Config(
     model=ModelConfig(hidden_size=256, num_classes=20),
     training=TrainingConfig(batch_size=128, num_epochs=50)
+)
+```
+
+### Performance & Reproducibility Flags
+
+Efficiency features are CPU-safe and opt-in (TF32 + `cudnn.benchmark` turn on
+automatically on CUDA):
+
+```python
+from config import Config, TrainingConfig
+
+config = Config(
+    training=TrainingConfig(
+        use_amp=True,        # mixed precision (CUDA only)
+        compile_model=True,  # torch.compile, falls back to eager on failure
+        gradient_clip=1.0,   # max gradient norm (applied during training)
+        drop_last=True,      # drop the last partial training batch
+    ),
+    deterministic=True,      # reproducible runs (disables TF32/benchmark)
 )
 ```
 
@@ -207,9 +228,20 @@ metrics_logger.log_epoch(epoch, metrics)
 
 ## 🧪 Running Tests
 
+Tests insert `../src` onto `sys.path`, so they run from any directory:
+
 ```bash
-cd tests
-pytest -v
+pytest -v                          # run the suite
+pytest --cov=src --cov-report=term-missing   # with coverage
+```
+
+Lint, format, and type-check (matches CI):
+
+```bash
+black src tests
+isort src tests
+flake8 src tests
+mypy src
 ```
 
 ## 🎓 Examples

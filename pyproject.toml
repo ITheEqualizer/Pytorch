@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pytorch-project"
+version = "1.0.0"
+description = "Production-ready PyTorch project template"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "PyTorch Project" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+# Includes torch for LOCAL development. The Docker path uses requirements.txt,
+# which omits torch (provided by the pytorch/pytorch base image). Versions of
+# overlapping packages are kept in sync with requirements.txt.
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.16.0",
+    "numpy>=1.24.0",
+    "tqdm>=4.66.0",
+    "tensorboard>=2.14.0",
+    "matplotlib>=3.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "flake8>=6.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/pytorch-project"
+
+# No [project.scripts]: the flat-import layout (see CLAUDE.md) means console
+# entry points cannot resolve. Run scripts via `cd src && python train.py`.
+
+[tool.setuptools]
+packages = ["src", "src.models", "src.utils"]
+
+[tool.black]
+line-length = 88
+target-version = ["py39", "py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+src_paths = ["src", "tests"]
+
+[tool.mypy]
+python_version = "3.10"
+mypy_path = "src"
+files = ["src"]
+explicit_package_bases = true
+ignore_missing_imports = true
+no_implicit_optional = true
+exclude = ['src/__init__\.py$']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v"

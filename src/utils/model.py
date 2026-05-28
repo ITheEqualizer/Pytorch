@@ -1,19 +1,20 @@
 """
 Model utilities for initialization, parameter counting, and model manipulation.
 """
-import torch
+
+from typing import List, Optional
+
 import torch.nn as nn
-from typing import Dict, List
 
 
 def count_parameters(model: nn.Module, trainable_only: bool = False) -> int:
     """
     Count the number of parameters in a model.
-    
+
     Args:
         model: PyTorch model.
         trainable_only: If True, count only trainable parameters.
-    
+
     Returns:
         Total number of parameters.
     """
@@ -25,13 +26,13 @@ def count_parameters(model: nn.Module, trainable_only: bool = False) -> int:
 def print_model_summary(model: nn.Module) -> None:
     """
     Print a summary of model architecture and parameters.
-    
+
     Args:
         model: PyTorch model to summarize.
     """
     total_params = count_parameters(model, trainable_only=False)
     trainable_params = count_parameters(model, trainable_only=True)
-    
+
     print("=" * 70)
     print("Model Summary")
     print("=" * 70)
@@ -43,38 +44,39 @@ def print_model_summary(model: nn.Module) -> None:
     print("=" * 70)
 
 
-def initialize_weights(model: nn.Module, init_type: str = 'xavier') -> None:
+def initialize_weights(model: nn.Module, init_type: str = "xavier") -> None:
     """
     Initialize model weights using specified initialization strategy.
-    
+
     Args:
         model: Model to initialize.
         init_type: Type of initialization ('xavier', 'kaiming', 'normal').
     """
     for m in model.modules():
         if isinstance(m, (nn.Conv2d, nn.Linear)):
-            if init_type == 'xavier':
+            if init_type == "xavier":
                 nn.init.xavier_uniform_(m.weight)
-            elif init_type == 'kaiming':
-                nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
-            elif init_type == 'normal':
+            elif init_type == "kaiming":
+                nn.init.kaiming_uniform_(m.weight, nonlinearity="relu")
+            elif init_type == "normal":
                 nn.init.normal_(m.weight, mean=0, std=0.01)
-            
+
             if m.bias is not None:
                 nn.init.constant_(m.bias, 0)
-        
+
         elif isinstance(m, (nn.BatchNorm2d, nn.BatchNorm1d)):
             nn.init.constant_(m.weight, 1)
             nn.init.constant_(m.bias, 0)
 
 
-def freeze_model(model: nn.Module, layer_names: List[str] = None) -> None:
+def freeze_model(model: nn.Module, layer_names: Optional[List[str]] = None) -> None:
     """
     Freeze model parameters to prevent training.
-    
+
     Args:
         model: Model to freeze.
-        layer_names: Optional list of specific layer names to freeze. If None, freezes all.
+        layer_names: Optional list of layer names to freeze. Freezes all
+            parameters when None.
     """
     if layer_names is None:
         for param in model.parameters():
@@ -85,13 +87,14 @@ def freeze_model(model: nn.Module, layer_names: List[str] = None) -> None:
                 param.requires_grad = False
 
 
-def unfreeze_model(model: nn.Module, layer_names: List[str] = None) -> None:
+def unfreeze_model(model: nn.Module, layer_names: Optional[List[str]] = None) -> None:
     """
     Unfreeze model parameters to allow training.
-    
+
     Args:
         model: Model to unfreeze.
-        layer_names: Optional list of specific layer names to unfreeze. If None, unfreezes all.
+        layer_names: Optional list of layer names to unfreeze. Unfreezes all
+            parameters when None.
     """
     if layer_names is None:
         for param in model.parameters():
@@ -100,33 +103,3 @@ def unfreeze_model(model: nn.Module, layer_names: List[str] = None) -> None:
         for name, param in model.named_parameters():
             if any(layer_name in name for layer_name in layer_names):
                 param.requires_grad = True
-
-
-def get_layer_lr_groups(
-    model: nn.Module,
-    base_lr: float,
-    layer_decay: float = 0.95
-) -> List[Dict]:
-    """
-    Create parameter groups with layer-wise learning rate decay.
-    
-    Args:
-        model: Model to create groups for.
-        base_lr: Base learning rate.
-        layer_decay: Decay factor for learning rate across layers.
-    
-    Returns:
-        List of parameter group dictionaries.
-    """
-    param_groups = []
-    
-    for i, (name, params) in enumerate(model.named_parameters()):
-        if params.requires_grad:
-            lr = base_lr * (layer_decay ** i)
-            param_groups.append({
-                'params': params,
-                'lr': lr,
-                'name': name
-            })
-    
-    return param_groups

@@ -66,7 +66,7 @@ def create_data_loaders(config):
     Returns:
         Tuple of (train_loader, val_loader).
     """
-    train_dataset = CustomerImageDataset(num_samples=5000)
+    train_dataset = CustomImageDataset(num_samples=5000)
     val_dataset = CustomImageDataset(num_samples=1000)
     
     train_loader = DataLoader(
