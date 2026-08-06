@@ -75,7 +75,7 @@ def plot_confusion_matrix(
     """
     fig, ax = plt.subplots(figsize=figsize)
     im = ax.imshow(cm, interpolation="nearest", cmap="Blues")
-    ax.figure.colorbar(im, ax=ax)
+    fig.colorbar(im, ax=ax)
 
     if class_names:
         ax.set(
