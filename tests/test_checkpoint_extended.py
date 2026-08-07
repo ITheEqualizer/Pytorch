@@ -2,6 +2,8 @@
 Unit tests for checkpoint loading, discovery, and cleanup.
 """
 
+from unittest.mock import patch
+
 import pytest
 import torch
 
@@ -20,9 +22,11 @@ def test_load_checkpoint_round_trip(tmp_path):
     save_checkpoint(filepath, model_a, optimizer, epoch=3)
 
     model_b = _make_model()
-    checkpoint = load_checkpoint(filepath, model_b)
+    with patch("utils.checkpoint.torch.load", wraps=torch.load) as torch_load:
+        checkpoint = load_checkpoint(filepath, model_b)
 
     assert checkpoint["epoch"] == 3
+    assert torch_load.call_args.kwargs["map_location"] == model_b.fc1.weight.device
     for param_a, param_b in zip(model_a.parameters(), model_b.parameters()):
         assert torch.allclose(param_a, param_b)
 
@@ -102,6 +106,8 @@ def test_checkpoint_manager_restores_best_metric(tmp_path):
     first = CheckpointManager(tmp_path)
     first.save(model, optimizer, epoch=1, metrics={"val_acc": 88.5}, is_best=True)
 
-    second = CheckpointManager(tmp_path)
+    with patch("utils.checkpoint.torch.load", wraps=torch.load) as torch_load:
+        second = CheckpointManager(tmp_path)
 
     assert second.best_metric == 88.5
+    assert torch_load.call_args.kwargs["map_location"] == "cpu"
