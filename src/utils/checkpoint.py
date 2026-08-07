@@ -52,7 +52,7 @@ class CheckpointManager:
         if not best_path.exists():
             return
         try:
-            checkpoint = torch.load(best_path, weights_only=True)
+            checkpoint = torch.load(best_path, map_location="cpu", weights_only=True)
         except Exception:
             return
         metrics = checkpoint.get("metrics", {})
@@ -181,14 +181,22 @@ def load_checkpoint(
     if not Path(filepath).exists():
         raise FileNotFoundError(f"Checkpoint not found: {filepath}")
 
+    first_parameter = next(model.parameters(), None)
+    first_buffer = next(model.buffers(), None)
+    model_device = (
+        first_parameter.device
+        if first_parameter is not None
+        else first_buffer.device if first_buffer is not None else torch.device("cpu")
+    )
+
     try:
-        checkpoint = torch.load(filepath, weights_only=True)
+        checkpoint = torch.load(filepath, map_location=model_device, weights_only=True)
     except Exception:
         logger.warning(
             f"Falling back to weights_only=False when loading {filepath}; "
             "the checkpoint contains non-tensor objects."
         )
-        checkpoint = torch.load(filepath, weights_only=False)
+        checkpoint = torch.load(filepath, map_location=model_device, weights_only=False)
     model.load_state_dict(checkpoint["model_state_dict"])
 
     if optimizer is not None and "optimizer_state_dict" in checkpoint:
