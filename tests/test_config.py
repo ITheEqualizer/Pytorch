@@ -51,6 +51,16 @@ def test_config_initialization():
     assert config.seed == 42
 
 
+def test_nondeterministic_config_resets_global_determinism():
+    Config(deterministic=True)
+    assert torch.are_deterministic_algorithms_enabled()
+    assert torch.backends.cudnn.deterministic
+
+    Config(deterministic=False)
+    assert not torch.are_deterministic_algorithms_enabled()
+    assert not torch.backends.cudnn.deterministic
+
+
 def test_get_config():
     config = get_config()
     assert isinstance(config, Config)

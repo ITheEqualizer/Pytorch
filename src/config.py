@@ -109,13 +109,13 @@ class Config:
         torch.manual_seed(self.seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(self.seed)
+        torch.backends.cudnn.deterministic = self.deterministic
+        torch.use_deterministic_algorithms(self.deterministic, warn_only=True)
         if self.deterministic:
-            torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
             torch.backends.cuda.matmul.allow_tf32 = False
             torch.backends.cudnn.allow_tf32 = False
             os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
-            torch.use_deterministic_algorithms(True, warn_only=True)
 
 
 def get_config() -> Config:
