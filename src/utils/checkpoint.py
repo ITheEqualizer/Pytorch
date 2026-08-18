@@ -106,6 +106,11 @@ class CheckpointManager:
             torch.save(checkpoint, best_path)
             logger.info(f"Best model saved: {best_path}")
 
+        self.checkpoints = [
+            tracked_path
+            for tracked_path in self.checkpoints
+            if tracked_path != checkpoint_path
+        ]
         self.checkpoints.append(checkpoint_path)
         self._cleanup_old_checkpoints()
 

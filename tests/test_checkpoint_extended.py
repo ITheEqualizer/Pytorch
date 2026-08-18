@@ -100,6 +100,23 @@ def test_checkpoint_manager_discovers_existing(tmp_path):
     ]
 
 
+def test_checkpoint_manager_keeps_overwritten_checkpoint_after_restart(tmp_path):
+    model = _make_model()
+    optimizer = torch.optim.Adam(model.parameters())
+    first = CheckpointManager(tmp_path, max_checkpoints=2)
+    first.save(model, optimizer, epoch=1, metrics={"val_acc": 1.0})
+    first.save(model, optimizer, epoch=2, metrics={"val_acc": 2.0})
+
+    restarted = CheckpointManager(tmp_path, max_checkpoints=2)
+    saved_path = restarted.save(model, optimizer, epoch=1, metrics={"val_acc": 3.0})
+
+    assert saved_path.exists()
+    assert [path.name for path in restarted.checkpoints] == [
+        "checkpoint_epoch_2.pth",
+        "checkpoint_epoch_1.pth",
+    ]
+
+
 def test_checkpoint_manager_restores_best_metric(tmp_path):
     model = _make_model()
     optimizer = torch.optim.Adam(model.parameters())
